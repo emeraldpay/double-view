@@ -1,0 +1,3 @@
+rootProject.name="react-ssr-view"
+
+include("react-view", "react-view-spring-webflux")

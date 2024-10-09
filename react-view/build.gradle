@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'groovy'
+    id 'maven-publish'
+}
+
+dependencies {
+    implementation("javax.servlet:javax.servlet-api:4.0.1")
+
+    api("org.graalvm.polyglot:polyglot:24.1.0")
+    api("org.graalvm.polyglot:js:24.1.0")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.3")
+    testImplementation("org.spockframework:spock-core:2.4-M4-groovy-4.0")
+}
+
+test {
+    useJUnitPlatform()
+}
+

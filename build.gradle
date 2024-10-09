@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+
+    group = 'io.emeraldpay.reactview'
+    version = '0.1.0-SNAPSHOT'
+
+    java {
+        sourceCompatibility = org.gradle.api.JavaVersion.VERSION_21
+        targetCompatibility = org.gradle.api.JavaVersion.VERSION_21
+
+        withJavadocJar()
+        withSourcesJar()
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    publishing {
+        repositories {
+            maven {
+                url "artifactregistry://us-maven.pkg.dev/emeraldpay-prod/maven"
+            }
+        }
+
+        publications {
+            Publication(org.gradle.api.publish.maven.MavenPublication) {
+                from components.findByName("java")
+
+                groupId project.group
+                artifactId project.name
+                version project.version
+                pom {
+                    name = "React SSR View"
+                    licenses {
+                        license {
+                            name = "The Apache Software License, Version 2.0"
+                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = "splix"
+                            name = "Igor Artamonov"
+                        }
+                    }
+
+                    scm {
+                        connection = "scm:git:git://github.com/emeraldpay/react-ssr-view.git"
+                        developerConnection = "scm:git:git://github.com/emeraldpay/react-ssr-view.git"
+                        url = "https://github.com/emeraldpay/react-ssr-view"
+                    }
+                }
+            }
+        }
+    }
+
+}
