@@ -1,5 +1,7 @@
 package io.emeraldpay.reactview;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ReactViewsRendererConfiguration {
 
     /**
@@ -20,6 +22,18 @@ public class ReactViewsRendererConfiguration {
     private boolean sandbox = false;
 
     private String moduleName = "reactview";
+
+    /**
+     * A mapper used to convert the props to JSON for a client-side processing.
+     */
+    private ObjectMapper objectMapper;
+
+    /**
+     * Path to the HTML template file.
+     * @see HTMLTemplate
+     * @see HTMLGenerator
+     */
+    private String htmlTemplatePath = "classpath:/reactview/template.html";
 
     /**
      * Enable JS compilation.
@@ -75,5 +89,21 @@ public class ReactViewsRendererConfiguration {
 
     public void enableOptimization(boolean useOptimization) {
         this.useOptimization = useOptimization;
+    }
+
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
+
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    public String getHtmlTemplatePath() {
+        return htmlTemplatePath;
+    }
+
+    public void setHtmlTemplatePath(String htmlTemplatePath) {
+        this.htmlTemplatePath = htmlTemplatePath;
     }
 }

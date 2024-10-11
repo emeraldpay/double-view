@@ -3,16 +3,27 @@ import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class ReactViewsRenderer {
 
     private final ReactViewsRendererConfiguration configuration;
     private PropsHandler propsHandler;
+    private ClientCode clientCode;
+    private Supplier<HTMLGenerator> htmlGenerator;
+    private Supplier<String> headGenerator;
 
     public ReactViewsRenderer(ReactViewsRendererConfiguration configuration) {
         this.configuration = configuration;
+        clientCode = new ClientCode(configuration);
+        try {
+            htmlGenerator = HTMLTemplate.newBuilder().fromPath(configuration.getHtmlTemplatePath()).build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String render(String componentName, Map<String, Object> props) {
@@ -35,7 +46,16 @@ public class ReactViewsRenderer {
                     callback
             );
 
-            return callback.getHtml();
+            String ssrHTML = callback.getHtml();
+
+            HTMLGenerator generator = htmlGenerator.get();
+            if (headGenerator != null) {
+                generator.addHead(headGenerator.get());
+            }
+            generator.setViewBody(ssrHTML);
+            generator.addPostBody(clientCode.generateScripts(componentName, finalProps));
+
+            return generator.generate();
         } catch (Exception e) {
             throw new RuntimeException("Failed to render component " + componentName, e);
         }
@@ -47,6 +67,30 @@ public class ReactViewsRenderer {
 
     public void setPropsHandler(PropsHandler propsHandler) {
         this.propsHandler = propsHandler;
+    }
+
+    public ClientCode getClientCode() {
+        return clientCode;
+    }
+
+    public void setClientCode(ClientCode clientCode) {
+        this.clientCode = clientCode;
+    }
+
+    public Supplier<HTMLGenerator> getHtmlGenerator() {
+        return htmlGenerator;
+    }
+
+    public void setHtmlGenerator(Supplier<HTMLGenerator> htmlGenerator) {
+        this.htmlGenerator = htmlGenerator;
+    }
+
+    public Supplier<String> getHeadGenerator() {
+        return headGenerator;
+    }
+
+    public void setHeadGenerator(Supplier<String> headGenerator) {
+        this.headGenerator = headGenerator;
     }
 
     public static final class RenderCallback {
