@@ -6,6 +6,7 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ReactViewsRenderer {
@@ -14,7 +15,7 @@ public class ReactViewsRenderer {
     private PropsHandler propsHandler;
     private ClientCode clientCode;
     private Supplier<HTMLGenerator> htmlGenerator;
-    private Supplier<String> headGenerator;
+    private Function<RenderContext, String> headGenerator;
 
     public ReactViewsRenderer(ReactViewsRendererConfiguration configuration) {
         this.configuration = configuration;
@@ -46,14 +47,16 @@ public class ReactViewsRenderer {
                     callback
             );
 
+            RenderContext renderContext = new RenderContext(componentName, finalProps);
+
             String ssrHTML = callback.getHtml();
 
             HTMLGenerator generator = htmlGenerator.get();
             if (headGenerator != null) {
-                generator.addHead(headGenerator.get());
+                generator.addHead(headGenerator.apply(renderContext));
             }
             generator.setViewBody(ssrHTML);
-            generator.addPostBody(clientCode.generateScripts(componentName, finalProps));
+            generator.addPostBody(clientCode.generateScripts(renderContext));
 
             return generator.generate();
         } catch (Exception e) {
@@ -85,11 +88,11 @@ public class ReactViewsRenderer {
         this.htmlGenerator = htmlGenerator;
     }
 
-    public Supplier<String> getHeadGenerator() {
+    public Function<RenderContext, String> getHeadGenerator() {
         return headGenerator;
     }
 
-    public void setHeadGenerator(Supplier<String> headGenerator) {
+    public void setHeadGenerator(Function<RenderContext, String> headGenerator) {
         this.headGenerator = headGenerator;
     }
 

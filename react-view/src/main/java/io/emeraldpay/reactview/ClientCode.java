@@ -41,14 +41,13 @@ public class ClientCode {
      * Generate the client-side code to initialize the React components.
      * It includes both the loader for the client bundle and the initialization code.
      *
-     * @param componentName React component name
-     * @param props properties used to initialize the component
+     * @param renderContext Render context
      * @return JavaScript code
      */
-    public String generateScripts(String componentName, Map<String, Object> props) {
+    public String generateScripts(RenderContext renderContext) {
         StringBuilder builder = new StringBuilder();
         builder.append(generateLoader());
-        builder.append(generateInit(componentName, props));
+        builder.append(generateInit(renderContext));
         return builder.toString();
     }
 
@@ -64,14 +63,13 @@ public class ClientCode {
     /**
      * Generate HTML code with data necessary to initialize the React component on the client side.
      *
-     * @param componentName React component name
-     * @param props properties used to initialize the component
+     * @param renderContext Render context
      * @return HTML code
      */
-    public String generateInit(String componentName, Map<String, Object> props) {
+    public String generateInit(RenderContext renderContext) {
         String propsJson;
         try {
-            propsJson = objectMapper.writeValueAsString(props);
+            propsJson = objectMapper.writeValueAsString(renderContext.getProps());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             propsJson = "{}";
@@ -79,7 +77,7 @@ public class ClientCode {
         return "<script type=\"text/javascript\">"
                 + "window.reactView = window.reactView || {};"
                 + "window.reactView.props = " + propsJson + ";"
-                + "window.reactView.component = '" + componentName + "';"
+                + "window.reactView.component = '" + renderContext.getComponentName() + "';"
                 + "</script>";
     }
 }
