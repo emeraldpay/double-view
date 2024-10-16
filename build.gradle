@@ -1,18 +1,25 @@
 plugins {
     id 'java'
+    id 'maven-publish'
+    id "com.google.cloud.artifactregistry.gradle-plugin" version "2.2.3"
 }
 
 repositories {
     mavenLocal()
     mavenCentral()
+
+    maven {
+        url "https://us-maven.pkg.dev/emeraldpay-prod/maven"
+    }
 }
 
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
+    apply plugin: "com.google.cloud.artifactregistry.gradle-plugin"
 
     group = 'io.emeraldpay.reactview'
-    version = '0.1.0-SNAPSHOT'
+    version = '0.1.0'
 
     java {
         sourceCompatibility = org.gradle.api.JavaVersion.VERSION_21
@@ -29,7 +36,7 @@ subprojects {
     publishing {
         repositories {
             maven {
-                url "artifactregistry://us-maven.pkg.dev/emeraldpay-prod/maven"
+                url "artifactregistry://us-maven.pkg.dev/emeraldpay-prod/maven/"
             }
         }
 
