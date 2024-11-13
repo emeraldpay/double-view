@@ -1,4 +1,4 @@
-package io.emeraldpay.reactview;
+package io.emeraldpay.doubleview;
 
 /**
  * Generates the final HTML page, with the rendered React component and the client-side code to initialize it.

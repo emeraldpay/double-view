@@ -1,6 +1,4 @@
-package io.emeraldpay.reactview;
-
-import java.util.Map;
+package io.emeraldpay.doubleview;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,7 +14,7 @@ public class ClientCode {
     public ClientCode() {
     }
 
-    public ClientCode(ReactViewsRendererConfiguration configuration) {
+    public ClientCode(DoubleViewsRendererConfiguration configuration) {
         this.clientBundleURL = configuration.getClientBundleURL();
         this.objectMapper = configuration.getObjectMapper();
     }
@@ -75,9 +73,9 @@ public class ClientCode {
             propsJson = "{}";
         }
         return "<script type=\"text/javascript\">"
-                + "window.reactView = window.reactView || {};"
-                + "window.reactView.props = " + propsJson + ";"
-                + "window.reactView.component = '" + renderContext.getComponentName() + "';"
+                + "window.doubleView = window.doubleView || {};"
+                + "window.doubleView.props = " + propsJson + ";"
+                + "window.doubleView.component = '" + renderContext.getComponentName() + "';"
                 + "</script>";
     }
 }

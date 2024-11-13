@@ -1,8 +1,8 @@
-package io.emeraldpay.reactview;
+package io.emeraldpay.doubleview;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ReactViewsRendererConfiguration {
+public class DoubleViewsRendererConfiguration {
 
     /**
      * Public URL of the client bundle. It is used to load the client bundle in the browser.
@@ -17,11 +17,11 @@ public class ReactViewsRendererConfiguration {
     /**
      * Render Script
      */
-    private String renderScript = "classpath:/reactview/render.js";
+    private String renderScript = "classpath:/doubleview/render.js";
 
     private boolean sandbox = false;
 
-    private String moduleName = "reactview";
+    private String moduleName = "doubleview";
 
     /**
      * A mapper used to convert the props to JSON for a client-side processing.
@@ -33,7 +33,7 @@ public class ReactViewsRendererConfiguration {
      * @see HTMLTemplate
      * @see HTMLGenerator
      */
-    private String htmlTemplatePath = "classpath:/reactview/template.html";
+    private String htmlTemplatePath = "classpath:/doubleview/template.html";
 
     /**
      * Enable JS compilation.

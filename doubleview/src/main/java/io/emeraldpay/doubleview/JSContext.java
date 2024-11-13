@@ -1,4 +1,4 @@
-package io.emeraldpay.reactview;
+package io.emeraldpay.doubleview;
 
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
@@ -14,7 +14,7 @@ class JSContext implements AutoCloseable {
     Value render;
     Value ssrModule;
 
-    JSContext(ReactViewsRendererConfiguration configuration) throws IOException {
+    JSContext(DoubleViewsRendererConfiguration configuration) throws IOException {
         var engineBuilder = Engine.newBuilder("js")
                 .out(System.out)
                 .err(System.err);

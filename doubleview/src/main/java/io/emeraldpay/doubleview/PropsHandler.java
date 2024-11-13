@@ -1,4 +1,4 @@
-package io.emeraldpay.reactview;
+package io.emeraldpay.doubleview;
 
 import java.io.PrintWriter;
 import java.util.Map;

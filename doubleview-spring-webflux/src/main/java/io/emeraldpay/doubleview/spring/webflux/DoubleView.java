@@ -1,6 +1,6 @@
-package io.emeraldpay.reactview.spring.webflux;
+package io.emeraldpay.doubleview.spring.webflux;
 
-import io.emeraldpay.reactview.ReactViewsRenderer;
+import io.emeraldpay.doubleview.DoubleViewsRenderer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -12,13 +12,13 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Map;
 
-public class ReactView implements View {
+public class DoubleView implements View {
 
-    private final ReactViewsRenderer renderer;
+    private final DoubleViewsRenderer renderer;
     private final List<MediaType> supportedMediaTypes = List.of(MediaType.TEXT_HTML);
     private final String componentName;
 
-    public ReactView(ReactViewsRenderer renderer, String componentName) {
+    public DoubleView(DoubleViewsRenderer renderer, String componentName) {
         this.renderer = renderer;
         this.componentName = componentName;
     }

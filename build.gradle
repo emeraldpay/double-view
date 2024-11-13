@@ -18,7 +18,7 @@ subprojects {
     apply plugin: 'maven-publish'
     apply plugin: "com.google.cloud.artifactregistry.gradle-plugin"
 
-    group = 'io.emeraldpay.reactview'
+    group = 'io.emeraldpay.doubleview'
     version = '0.2.0-SNAPSHOT'
 
     java {
@@ -48,7 +48,7 @@ subprojects {
                 artifactId project.name
                 version project.version
                 pom {
-                    name = "React SSR View"
+                    name = "Double View"
                     licenses {
                         license {
                             name = "The Apache Software License, Version 2.0"
@@ -63,9 +63,9 @@ subprojects {
                     }
 
                     scm {
-                        connection = "scm:git:git://github.com/emeraldpay/react-ssr-view.git"
-                        developerConnection = "scm:git:git://github.com/emeraldpay/react-ssr-view.git"
-                        url = "https://github.com/emeraldpay/react-ssr-view"
+                        connection = "scm:git:git://github.com/emeraldpay/double-view.git"
+                        developerConnection = "scm:git:git://github.com/emeraldpay/double-view.git"
+                        url = "https://github.com/emeraldpay/double-view"
                     }
                 }
             }

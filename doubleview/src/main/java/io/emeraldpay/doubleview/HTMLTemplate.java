@@ -1,4 +1,4 @@
-package io.emeraldpay.reactview;
+package io.emeraldpay.doubleview;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -14,7 +14,7 @@ import java.io.InputStream;
 /**
  *
  * An HTML generator based on a template where part to replace are marked with placeholders like {@code <!-- REACT:HEAD -->}.
- * A default template is in the resources as {@see resources/reactview/template.html}
+ * A default template is in the resources as {@see resources/doubleview/template.html}
  *
  */
 public class HTMLTemplate implements Supplier<HTMLGenerator> {

@@ -1,4 +1,4 @@
-package io.emeraldpay.reactview;
+package io.emeraldpay.doubleview;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.proxy.ProxyObject;
@@ -9,15 +9,15 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class ReactViewsRenderer {
+public class DoubleViewsRenderer {
 
-    private final ReactViewsRendererConfiguration configuration;
+    private final DoubleViewsRendererConfiguration configuration;
     private PropsHandler propsHandler;
     private ClientCode clientCode;
     private Supplier<HTMLGenerator> htmlGenerator;
     private Function<RenderContext, String> headGenerator;
 
-    public ReactViewsRenderer(ReactViewsRendererConfiguration configuration) {
+    public DoubleViewsRenderer(DoubleViewsRendererConfiguration configuration) {
         this.configuration = configuration;
         clientCode = new ClientCode(configuration);
         try {
