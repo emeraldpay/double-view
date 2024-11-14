@@ -17,7 +17,7 @@ public class DoubleViewsRendererConfiguration {
     /**
      * Render Script
      */
-    private String renderScript = "classpath:/doubleview/render.js";
+    private String rendererScript = "classpath:/doubleview/render.js";
 
     private boolean sandbox = false;
 
@@ -59,12 +59,12 @@ public class DoubleViewsRendererConfiguration {
         this.serverBundlePath = serverBundlePath;
     }
 
-    public String getRenderScript() {
-        return renderScript;
+    public String getRendererScript() {
+        return rendererScript;
     }
 
-    public void setRenderScript(String renderScript) {
-        this.renderScript = renderScript;
+    public void setRendererScript(String rendererScript) {
+        this.rendererScript = rendererScript;
     }
 
     public boolean isSandbox() {

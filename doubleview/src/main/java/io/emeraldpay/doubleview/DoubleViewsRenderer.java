@@ -17,6 +17,8 @@ public class DoubleViewsRenderer {
     private Supplier<HTMLGenerator> htmlGenerator;
     private Function<RenderContext, String> headGenerator;
 
+    private final JSContextProvider jsContextProvider;
+
     public DoubleViewsRenderer(DoubleViewsRendererConfiguration configuration) {
         this.configuration = configuration;
         clientCode = new ClientCode(configuration);
@@ -25,10 +27,11 @@ public class DoubleViewsRenderer {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        jsContextProvider = new JSContextProvider(configuration);
     }
 
     public String render(String componentName, Map<String, Object> props) {
-        try (JSContext context = new JSContext(configuration)) {
+        try (JSContext context = jsContextProvider.get()) {
             RenderCallback callback = new RenderCallback();
 
             Map<String, Object> finalProps;
@@ -38,9 +41,9 @@ public class DoubleViewsRenderer {
                 finalProps = props;
             }
 
-            Value jsProps = context.polyglotContext.asValue(ProxyObject.fromMap(finalProps));
-            context.render.execute(
-                    context.ssrModule,
+            Value jsProps = context.getPolyglotContext().asValue(ProxyObject.fromMap(finalProps));
+            context.getRenderer().execute(
+                    context.getComponents(),
                     configuration.getModuleName(),
                     componentName,
                     jsProps,
@@ -96,6 +99,9 @@ public class DoubleViewsRenderer {
         this.headGenerator = headGenerator;
     }
 
+    /**
+     * Gets the results back from the Renderer script.
+     */
     public static final class RenderCallback {
         private String html = "<div>Not Rendered</div>";
 
