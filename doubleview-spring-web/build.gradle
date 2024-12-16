@@ -7,7 +7,8 @@ plugins {
 dependencies {
     api project(":doubleview")
 
-    implementation 'org.springframework:spring-webflux:6.2.1'
+    implementation 'org.springframework:spring-webmvc:6.2.1'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
 }
 
 test {
