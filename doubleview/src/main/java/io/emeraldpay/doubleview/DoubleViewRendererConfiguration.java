@@ -19,8 +19,6 @@ public class DoubleViewRendererConfiguration {
      */
     private String rendererScript = "classpath:/doubleview/render.js";
 
-    private boolean sandbox = false;
-
     private String moduleName = "doubleview";
 
     /**
@@ -65,14 +63,6 @@ public class DoubleViewRendererConfiguration {
 
     public void setRendererScript(String rendererScript) {
         this.rendererScript = rendererScript;
-    }
-
-    public boolean isSandbox() {
-        return sandbox;
-    }
-
-    public void setSandbox(boolean sandbox) {
-        this.sandbox = sandbox;
     }
 
     public String getModuleName() {
