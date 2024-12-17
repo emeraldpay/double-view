@@ -62,7 +62,7 @@ class JSContext implements AutoCloseable {
         private final Source render;
         private final Context.Builder polyglotContext;
 
-        Builder(DoubleViewsRendererConfiguration configuration) throws IOException {
+        Builder(DoubleViewRendererConfiguration configuration) throws IOException {
             Engine.Builder engine = Engine.newBuilder("js")
                     .out(System.out)
                     .err(System.err);

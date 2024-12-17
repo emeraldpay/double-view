@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class DoubleViewsRenderer {
+public class DoubleViewRenderer {
 
-    private final DoubleViewsRendererConfiguration configuration;
+    private final DoubleViewRendererConfiguration configuration;
     private PropsHandler propsHandler;
     private ClientCode clientCode;
     private Supplier<HTMLGenerator> htmlGenerator;
@@ -19,7 +19,7 @@ public class DoubleViewsRenderer {
 
     private final JSContextProvider jsContextProvider;
 
-    public DoubleViewsRenderer(DoubleViewsRendererConfiguration configuration) {
+    public DoubleViewRenderer(DoubleViewRendererConfiguration configuration) {
         this.configuration = configuration;
         clientCode = new ClientCode(configuration);
         try {

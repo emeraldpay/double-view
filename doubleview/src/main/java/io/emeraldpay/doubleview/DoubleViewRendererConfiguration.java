@@ -2,7 +2,7 @@ package io.emeraldpay.doubleview;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class DoubleViewsRendererConfiguration {
+public class DoubleViewRendererConfiguration {
 
     /**
      * Public URL of the client bundle. It is used to load the client bundle in the browser.

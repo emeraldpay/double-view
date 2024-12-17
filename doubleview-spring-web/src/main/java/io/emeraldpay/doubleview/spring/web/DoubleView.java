@@ -1,6 +1,6 @@
 package io.emeraldpay.doubleview.spring.web;
 
-import io.emeraldpay.doubleview.DoubleViewsRenderer;
+import io.emeraldpay.doubleview.DoubleViewRenderer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
@@ -10,10 +10,10 @@ import java.util.Map;
 
 public class DoubleView implements View {
 
-    private final DoubleViewsRenderer renderer;
+    private final DoubleViewRenderer renderer;
     private final String componentName;
 
-    public DoubleView(DoubleViewsRenderer renderer, String componentName) {
+    public DoubleView(DoubleViewRenderer renderer, String componentName) {
         this.renderer = renderer;
         this.componentName = componentName;
     }

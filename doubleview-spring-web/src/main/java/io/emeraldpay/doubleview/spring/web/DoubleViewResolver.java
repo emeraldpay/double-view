@@ -1,7 +1,7 @@
 package io.emeraldpay.doubleview.spring.web;
 
-import io.emeraldpay.doubleview.DoubleViewsRenderer;
-import io.emeraldpay.doubleview.DoubleViewsRendererConfiguration;
+import io.emeraldpay.doubleview.DoubleViewRenderer;
+import io.emeraldpay.doubleview.DoubleViewRendererConfiguration;
 import org.springframework.web.servlet.View;
 import  org.springframework.web.servlet.ViewResolver;
 
@@ -9,13 +9,13 @@ import java.util.Locale;
 
 public class DoubleViewResolver implements ViewResolver {
 
-    private final DoubleViewsRenderer renderer;
+    private final DoubleViewRenderer renderer;
 
-    public DoubleViewResolver(DoubleViewsRendererConfiguration configuration) {
-        renderer = new DoubleViewsRenderer(configuration);
+    public DoubleViewResolver(DoubleViewRendererConfiguration configuration) {
+        renderer = new DoubleViewRenderer(configuration);
     }
 
-    public DoubleViewResolver(DoubleViewsRenderer renderer) {
+    public DoubleViewResolver(DoubleViewRenderer renderer) {
         this.renderer = renderer;
     }
 

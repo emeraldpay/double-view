@@ -7,7 +7,7 @@ public class JSContextProvider {
 
     private final ThreadLocal<JSContext.Builder> context;
 
-    public JSContextProvider(DoubleViewsRendererConfiguration configuration) {
+    public JSContextProvider(DoubleViewRendererConfiguration configuration) {
         context = ThreadLocal.withInitial(() -> {
             try {
                 return new JSContext.Builder(configuration);

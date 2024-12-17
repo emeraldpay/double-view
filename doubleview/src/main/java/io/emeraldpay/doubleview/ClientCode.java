@@ -14,7 +14,7 @@ public class ClientCode {
     public ClientCode() {
     }
 
-    public ClientCode(DoubleViewsRendererConfiguration configuration) {
+    public ClientCode(DoubleViewRendererConfiguration configuration) {
         this.clientBundleURL = configuration.getClientBundleURL();
         this.objectMapper = configuration.getObjectMapper();
     }
