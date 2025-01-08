@@ -1,0 +1,32 @@
+name: Tests
+
+on:
+    # if pushed directly to the master
+    push:
+        branches:
+            - master
+            - release/*
+            - ci/*
+    # on a pull request
+    pull_request:
+        branches:
+            - master
+            - release/*
+            - ci/*
+
+jobs:
+    unit-test:
+        name: Standard Unit Test
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v2
+
+            -   name: Set up JDK
+                uses: actions/setup-java@v1
+                with:
+                    java-version: 21
+
+            -   name: Check
+                uses: eskatos/gradle-command-action@v1
+                with:
+                    arguments: check
