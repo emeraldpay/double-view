@@ -1,0 +1,40 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url  "https://maven.emrld.io" }
+    }
+}
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.springframework.boot' version '3.2.2'
+}
+
+group = "doubleview.todo"
+version = 'SNAPSHOT'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://repo.spring.io/milestone" }
+    maven { url  "https://maven.emrld.io" }
+}
+
+dependencies {
+    implementation "io.emeraldpay.doubleview:doubleview:0.3.0"
+    implementation "io.emeraldpay.doubleview:doubleview-spring-web:0.3.0"
+
+    implementation "org.springframework.boot:spring-boot-starter-web:3.4.0"
+
+    implementation "com.fasterxml.jackson.core:jackson-core:2.18.2"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.18.2"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.18.2"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2"
+    implementation "com.fasterxml.jackson.module:jackson-modules-java8:2.18.2"
+}
+
+application {
+    mainClassName = 'doubleview.todo.Application'
+}

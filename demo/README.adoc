@@ -1,0 +1,135 @@
+= A simple TODO app using Double View
+
+== Structure of the project
+
+- Uses React and Mantine UI
+- Spring Web MVC as the backend
+- On the first load the HTML page is rendered on the server side
+** All the following interaction (adding/completing tasks) is dynamic client side UI
+** All changes submitted to the backend via REST API
+** I.e., on page reload the user sees the same state as before
+- There is no database or users, and the TODO list is stored on the server memory just for the demo purposes
+
+
+For the JS compilation it uses View with two different configurations, one for the Server Side and another one for the Client Side.
+
+== Usage
+
+=== Build JS code
+
+[source,shell]
+----
+pnpm install
+pnpm run build
+----
+
+=== Run the server
+
+[source,shell]
+----
+./gradlew bootRun
+----
+
+== Notes on the implementation
+
+=== Vite build configuration
+
+For the server-side code we tell Vite to run in `SSR` mode.
+The other options are `webworker` as the target, `noExternals`. It could probably work with those options, but from several experiments it seems that this provides the optimal code.
+
+[source,js]
+----
+ssr: {
+  noExternal: true,
+  target: 'webworker',
+},
+build: {
+  ssr: true,
+}
+----
+
+Also, it's important to enable the Polyfills for the Node modules because GraalVM does not provide them and so without those polyfills the code will not work.
+
+[source,js]
+----
+nodePolyfills({
+  include: ['util', 'stream', 'events', 'buffer']
+})
+----
+
+For both client and server side it's important to set the _name_ of the module as it's going to be configured in the Java code:
+
+[source,js]
+----
+build: {
+  lib: {
+    name: 'doubleview-demo-todo',
+  },
+}
+----
+
+=== JS Server Code
+
+The server code just exports the React components that will be used by the Double View to render the backend HTML.
+The `server.ts` mut export all top React entry points that the application uses and the React itself.
+
+Depending on the view name as it by a server mapping (for this demo app we have only one _view_ called `App`) the server will use the corresponding React component to render the HTML.
+
+.`server.ts`
+[source, js]
+----
+import React from "react";
+import ReactDOMServer from 'react-dom/server';
+
+import {App} from "./App";
+
+export {
+  App,
+  React, ReactDOMServer
+}
+----
+
+=== JS Client Code
+
+NOTE: It's not required to have a dynamic client side, but it's probably the whole point of having a React app. Otherwise, you can just render everything on the backend and produce just plain HTML.
+
+When the page is loaded in the browser it's time to attach (_hydrate_) the original React component to the HTML that was rendered on the server side.
+
+.`client.ts`
+[source, js]
+----
+addEventListener("load", () => {
+    hydrateRoot(document.getElementById("react"), <App {...window.doubleView.props}/>);
+});
+----
+
+=== Java Code
+
+From the Java perspective it uses the React components and the view names. Ex. just `App` for this simple app.
+
+[source, java]
+----
+@GetMapping("/")
+public ModelAndView index() {
+    return new ModelAndView(
+            "App", // React component name
+            "todos", todosModel // todosModel will become `.todos` property of the React component
+    );
+}
+----
+
+WARNING: Technically GraalVM accepts the Java objects as is, but if you use them in that that way it creates a lot of inconsistencies in between client and backend code because on the backend you will have only plain JSON. It's strongly suggested to convert to some basing / unified data structured to be consistent. For example in JS the access to the fields are by name, but in Java you have _getters_.
+
+In this demo app the Java objects are converted to a basic Map<String, Object> structure before rendering:
+
+._Todo_ item structure that is consistent with the JSON model (i.e., fields are accessed by name):
+[source, java]
+----
+public Map<String, Object> toJSON() {
+    Map<String, Object> json = new HashMap<>();
+    json.put("id", id);
+    json.put("title", title);
+    json.put("completed", completed);
+    return json;
+}
+----

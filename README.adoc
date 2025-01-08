@@ -1,0 +1,108 @@
+= Double View - React SSR Views for Java
+:lib-version: 0.3.0
+
+image:https://github.com/emeraldpay/double-view/workflows/Tests/badge.svg["Unit Tests"]
+image:https://img.shields.io/github/license/emeraldpay/double-view.svg?maxAge=2592000["License",link="https://github.com/emeraldpay/double-view/blob/master/LICENSE"]
+
+.Features:
+- Server-side rendering (SSR) using React with Java backend
+- Uses GraalVM to execute the Javascript code on the server side
+- Almost any standard React components can be used on the server side
+- Server provides standard HTML rendered from the React components
+- This HTML can be attached to the same React code on the client side (the _Hydration_)
+- Compatible with Spring Web MVC and Spring WebFlux
+
+Double View allows to use standard React (and possible other JS frameworks, such as Vue) seamlessly with Java backend frameworks.
+Once the React View has rendered on the server (SSR) it can be "hydrated" back to the same React code on the client side and continue dynamic interaction without any change to the original React code.
+
+== How it works
+
+=== Dependency
+
+[source,groovy,subs="attributes"]
+----
+repositories {
+    maven { url  "https://maven.emrld.io" }
+}
+dependencies {
+    implementation "io.emeraldpay.doubleview:doubleview:{lib-version}"
+    implementation "io.emeraldpay.doubleview:doubleview-spring-web:{lib-version}"
+}
+----
+
+=== JS Client And Server Code
+
+The same Javascript / Typescript code is compiled for the server and the client side. The different is just the compilation options, and no code changes are required to support both.
+
+For example, if using Vite, the main configuration options is to specify `ssr` mode for server side compilation.
+
+Also, because Double View uses GraalVM on the server side, some of the JS modules designed for the NodeJS specifics may not work out of the box.
+In this case it's suggested to enable the Polyfills for the Node modules, such as `util`, `stream`, `events`, `buffer`, etc.
+See link:demo/vite.server.ts[demo/vite.server.ts] for the examples.
+
+Note that all the dynamic parts (such as `useState`) are basically ignored on the server side, because of the SSR mode. But once it's _hydrated_ on the client side it will work as expected. The page loaded from the server will be fully interactive.
+
+=== Java Configuration (Spring)
+
+==== Setup Spring View Resolver
+
+[source, java]
+----
+@Override
+public void configureViewResolvers(ViewResolverRegistry registry) {
+    DoubleViewRendererConfiguration config = new DoubleViewRendererConfiguration();
+    // set the name same as defined in `vite.ts`
+    config.setModuleName("my-app-module");
+    // to convert properties to the JSON
+    config.setObjectMapper(new ObjectMapper());
+    // URL to the client side JS
+    config.setClientBundleURL("/client.js");
+    // path to the server side JS
+    config.setServerBundlePath("classpath://server.js");
+
+    DoubleViewRenderer renderer = new DoubleViewRenderer(config);
+
+    // other options for the HTML head, such as title, styles, etc
+    renderer.setHeadGenerator(new HTMLHeadValues.Builder()
+            .title("DoubleView Demo")
+            .stylesheet("/styles.css")
+            .build()
+    );
+
+    registry.viewResolver(new DoubleViewResolver(renderer));
+}
+----
+
+==== Use React components as views:
+
+[source, java]
+----
+@GetMapping("/")
+public ModelAndView index() {
+    return new ModelAndView(
+        "MyAppComponent", // React component name
+        // a model / properties passed to the React component
+        "prop-one", propValue
+    );
+}
+----
+
+== Demo Project
+
+See the demo project: link:demo/[Double View Demo]
+
+== Acknowledgements
+
+The initial code was based on the code for the Micronaut Views implementation of the React SSR (https://github.com/micronaut-projects/micronaut-views/tree/5.5.x/views-react/src/main/java/io/micronaut/views/react[see the original code here]).
+This project adopts the same approach for other Java Web frameworks, such as Spring.
+
+== License
+
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and limitations under the License.
