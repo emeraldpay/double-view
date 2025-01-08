@@ -1,0 +1,62 @@
+name: Publish
+
+on:
+    release:
+        types: [created]
+
+jobs:
+    publish-github:
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@master
+                with:
+                    ref: ${{ github.ref }}
+            -   name: Set up JDK
+                uses: actions/setup-java@v1
+                with:
+                    java-version: 21
+            -   name: Check
+                uses: eskatos/gradle-command-action@v1
+                with:
+                    arguments: check
+            -   name: Build
+                uses: eskatos/gradle-command-action@v1
+                with:
+                    arguments: build
+            -   name: Sync Jars
+                uses: eskatos/gradle-command-action@v1
+                with:
+                    arguments: syncJars
+            -   name: Upload Jars
+                id: upload-release-asset
+                uses: svenstaro/upload-release-action@v1-release
+                with:
+                    repo_token: ${{ secrets.GITHUB_TOKEN }}
+                    tag: ${{ github.ref }}
+                    file: ./build/libs/*.jar
+                    file_glob: true
+
+    publish-gcp-artifacts:
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@master
+                with:
+                    ref: ${{ github.ref }}
+            -   name: Set up JDK
+                uses: actions/setup-java@v1
+                with:
+                    java-version: 21
+            -   name: Check
+                uses: eskatos/gradle-command-action@v1
+                with:
+                    arguments: check
+            -   name: Setup GCP
+                uses: google-github-actions/setup-gcloud@v0
+                with:
+                    project_id: ${{ secrets.GCP_PROJECT_ID }}
+                    service_account_key: ${{ secrets.GCP_ARTIFACTS_KEY }}
+                    export_default_credentials: true
+            -   name: Upload to GCP
+                uses: eskatos/gradle-command-action@v1
+                with:
+                    arguments: publish
