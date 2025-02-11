@@ -8,6 +8,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
 import java.util.Map;
@@ -17,9 +19,11 @@ public class DoubleView implements View {
     private final DoubleViewRenderer renderer;
     private final List<MediaType> supportedMediaTypes = List.of(MediaType.TEXT_HTML);
     private final String componentName;
+    private final Scheduler scheduler;
 
-    public DoubleView(DoubleViewRenderer renderer, String componentName) {
+    public DoubleView(DoubleViewRenderer renderer, Scheduler scheduler, String componentName) {
         this.renderer = renderer;
+        this.scheduler = scheduler;
         this.componentName = componentName;
     }
 
@@ -35,6 +39,6 @@ public class DoubleView implements View {
         return response.writeWith(Mono.fromCallable( () -> {
             String rendered = renderer.render(componentName, (Map<String, Object>) model);
             return DefaultDataBufferFactory.sharedInstance.wrap(rendered.getBytes());
-        }));
+        }).subscribeOn(scheduler));
     }
 }
