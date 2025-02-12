@@ -8,8 +8,8 @@ dependencies {
     implementation("javax.servlet:javax.servlet-api:4.0.1")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
 
-    api("org.graalvm.polyglot:polyglot:24.1.0")
-    api("org.graalvm.polyglot:js:24.1.0")
+    api("org.graalvm.polyglot:polyglot:24.1.2")
+    api("org.graalvm.polyglot:js:24.1.2")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.3")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.3")
