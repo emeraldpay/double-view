@@ -57,12 +57,17 @@ class JSContext implements AutoCloseable {
         return components;
     }
 
-    public static class Builder {
-        private final Source bundle;
-        private final Source render;
-        private final Context.Builder polyglotContext;
+    public static Builder builder(DoubleViewRendererConfiguration configuration) throws IOException {
+        if (configuration.isDevMode()) {
+            return new DevBuilder(configuration);
+        }
+        return new DefaultBuilder(configuration);
+    }
 
-        Builder(DoubleViewRendererConfiguration configuration) throws IOException {
+    public static abstract class Builder {
+        protected final Context.Builder polyglotContext;
+
+        public Builder(DoubleViewRendererConfiguration configuration) {
             Engine.Builder engine = Engine.newBuilder("js")
                     .out(System.out)
                     .err(System.err);
@@ -72,9 +77,6 @@ class JSContext implements AutoCloseable {
                 engine = engine.option("engine.WarnInterpreterOnly", "false");
             }
 
-            bundle = loadSource(configuration.getServerBundlePath());
-            render = loadSource(configuration.getRendererScript());
-
             polyglotContext = Context.newBuilder("js")
                     .engine(engine.build())
                     .allowAllAccess(true)
@@ -82,7 +84,13 @@ class JSContext implements AutoCloseable {
                     .option("js.unhandled-rejections", "throw");
         }
 
-        public Source loadSource(String path) throws IOException {
+        /**
+         * Creates a fresh state for execution. Should be called each time the code is executed.
+         * @return a new JSContext
+         */
+        abstract JSContext build();
+
+        public static Source loadSource(String path) throws IOException {
             if (path.startsWith(".") || path.startsWith("/")) {
                 path = "file:" + path;
             }
@@ -93,7 +101,7 @@ class JSContext implements AutoCloseable {
             if (path.startsWith("classpath:")) {
                 String resourcePath = path.substring("classpath:".length());
                 fileName = resourcePath.substring(resourcePath.lastIndexOf('/') + 1);
-                try (var stream = getClass().getResourceAsStream(resourcePath)) {
+                try (var stream = Builder.class.getResourceAsStream(resourcePath)) {
                     if (stream == null) {
                         throw new IllegalArgumentException("Resource not found: " + resourcePath);
                     }
@@ -111,14 +119,51 @@ class JSContext implements AutoCloseable {
                     .mimeType("application/javascript+module")
                     .build();
         }
+    }
 
-        /**
-         * Creates a fresh state for execution. Should be called each time the code is executed.
-         * @return a new JSContext
-         */
+    public static class DefaultBuilder extends Builder {
+        private final Source bundle;
+        private final Source render;
+
+        private DefaultBuilder(DoubleViewRendererConfiguration configuration) throws IOException {
+            super(configuration);
+            bundle = loadSource(configuration.getServerBundlePath());
+            render = loadSource(configuration.getRendererScript());
+
+        }
+
         public JSContext build() {
             return new JSContext(polyglotContext.build(), bundle, render);
         }
 
     }
+
+    /**
+     * In development mode, the renderer loads the code each time before rendering.
+     * Which allows to see the changes without restarting the application.
+     */
+    public static class DevBuilder extends Builder {
+        private final String serverBundlePath;
+        private final String rendererScript;
+
+        private DevBuilder(DoubleViewRendererConfiguration configuration) {
+            super(configuration);
+            serverBundlePath = configuration.getServerBundlePath();
+            rendererScript = configuration.getRendererScript();
+        }
+
+        public JSContext build() {
+            Source bundle;
+            Source render;
+            try {
+                bundle = loadSource(serverBundlePath);
+                render = loadSource(rendererScript);
+            } catch (IOException e) {
+                throw new RuntimeException("Server bundle or render script load failed in dev mode", e);
+            }
+            return new JSContext(polyglotContext.build(), bundle, render);
+        }
+
+    }
+
 }

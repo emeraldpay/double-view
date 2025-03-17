@@ -10,7 +10,7 @@ public class JSContextProvider {
     public JSContextProvider(DoubleViewRendererConfiguration configuration) {
         context = ThreadLocal.withInitial(() -> {
             try {
-                return new JSContext.Builder(configuration);
+                return JSContext.builder(configuration);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to create JSContext", e);
             }
