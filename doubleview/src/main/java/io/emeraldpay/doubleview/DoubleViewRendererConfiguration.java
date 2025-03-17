@@ -41,6 +41,12 @@ public class DoubleViewRendererConfiguration {
      */
     private boolean useOptimization = true;
 
+    /**
+     * Enable development mode.
+     * In development mode, the renderer loads the code each time before rendering. Which allows to see the changes without restarting the application.
+     */
+    private boolean devMode = false;
+
     public String getClientBundleURL() {
         return clientBundleURL;
     }
@@ -96,4 +102,17 @@ public class DoubleViewRendererConfiguration {
     public void setHtmlTemplatePath(String htmlTemplatePath) {
         this.htmlTemplatePath = htmlTemplatePath;
     }
+
+    public boolean isDevMode() {
+        return devMode;
+    }
+
+    public void setDevMode(boolean devMode) {
+        this.devMode = devMode;
+    }
+
+    public void setDevMode() {
+        setDevMode(true);
+    }
+
 }
