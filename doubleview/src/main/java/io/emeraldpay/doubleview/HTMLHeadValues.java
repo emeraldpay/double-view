@@ -1,5 +1,6 @@
 package io.emeraldpay.doubleview;
 
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,11 @@ public class HTMLHeadValues implements Function<RenderContext, String> {
 
         public Builder add(Function<RenderContext, String> value) {
             source.add(value);
+            return this;
+        }
+
+        public Builder addAll(Collection<Function<RenderContext, String>> values) {
+            source.addAll(values);
             return this;
         }
 
