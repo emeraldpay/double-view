@@ -16,7 +16,19 @@ dependencies {
     testImplementation("org.spockframework:spock-core:2.4-M4-groovy-4.0")
 }
 
+task installTestJsDependencies(type: Exec) {
+    workingDir 'src/test/js'
+    commandLine('/bin/bash', '-c', 'pnpm install')
+}
+
+task buildTestJsBundle(type: Exec) {
+    workingDir 'src/test/js'
+    commandLine('/bin/bash', '-c', 'pnpm run build')
+    dependsOn installTestJsDependencies
+}
+
 test {
     useJUnitPlatform()
+    dependsOn buildTestJsBundle
 }
 

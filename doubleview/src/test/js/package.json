@@ -1,0 +1,21 @@
+{
+  "name": "doubleview-test",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "fast-text-encoding": "^1.0.6"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.17",
+    "@types/react-dom": "^18.3.5",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite-plugin-node-polyfills": "^0.22.0"
+  }
+}
