@@ -2,6 +2,9 @@ package io.emeraldpay.doubleview;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DoubleViewRendererConfiguration {
 
     /**
@@ -46,6 +49,12 @@ public class DoubleViewRendererConfiguration {
      * In development mode, the renderer loads the code each time before rendering. Which allows to see the changes without restarting the application.
      */
     private boolean devMode = false;
+
+    /**
+     * List of request attribute names that should be passed to React components as WebContext.
+     * By default, no attributes are passed.
+     */
+    private List<String> requestAttributes = new ArrayList<>();
 
     public String getClientBundleURL() {
         return clientBundleURL;
@@ -113,6 +122,14 @@ public class DoubleViewRendererConfiguration {
 
     public void setDevMode() {
         setDevMode(true);
+    }
+
+    public List<String> getRequestAttributes() {
+        return requestAttributes;
+    }
+
+    public void setRequestAttributes(List<String> requestAttributes) {
+        this.requestAttributes = requestAttributes != null ? requestAttributes : new ArrayList<>();
     }
 
 }

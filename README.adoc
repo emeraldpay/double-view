@@ -87,6 +87,67 @@ public ModelAndView index() {
 }
 ----
 
+== How To
+
+=== Access Request Attributes
+
+The Configuration of the Double View Renderer allows setting up a list of request attributes that will be passed to the React component as a React Context.
+I.e., it's not a part of the model and is always available in any React component.
+
+By default, no attributes are passed, so you need to configure the name explicitly:
+
+[source,java]
+----
+config.setRequestAttributes(
+    List.of("userId", "locale")
+);
+----
+
+To access them in React use the following code:
+[source, typescript]
+----
+import React from 'react';
+
+const moduleName = "my-app-module"; // should match the name set in the DoubleViewRendererConfiguration
+
+type WebContextType = {
+  attributes: Record<string, any>;
+}
+
+type DoubleView = {
+  component: string,
+  props: any,
+  context: WebContextType
+}
+
+function getDoubleView(): DoubleView {
+  // @ts-ignore
+  let instance = (globalThis as any).doubleView as DoubleView;
+  if (!instance) {
+    console.error("No DoubleView instance found in global scope");
+  }
+  return instance;
+}
+
+function useWebContext(): WebContextType | null {
+  let module = (globalThis as any)[moduleName];
+
+  if (!module) {
+    // @ts-ignore
+    globalThis[moduleName] = {}; // Initialize it if not found
+    module = (globalThis as any)[moduleName];
+  }
+
+  let WebContext = module.WebContext;
+  if (!WebContext) {
+    WebContext = React.createContext(getDoubleView().context)
+    module.WebContext = WebContext; // Store it back to global scope
+  }
+
+  return React.useContext(WebContext);
+}
+----
+
 == Demo Project
 
 See the demo project: link:demo/[Double View Demo]

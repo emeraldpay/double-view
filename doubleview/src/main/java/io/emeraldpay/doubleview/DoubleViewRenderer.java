@@ -31,6 +31,10 @@ public class DoubleViewRenderer {
     }
 
     public String render(String componentName, Map<String, Object> props) {
+        return render(componentName, props, WebContext.empty());
+    }
+
+    public String render(String componentName, Map<String, Object> props, WebContext webContext) {
         try (JSContext context = jsContextProvider.get()) {
             RenderCallback callback = new RenderCallback();
 
@@ -42,15 +46,18 @@ public class DoubleViewRenderer {
             }
 
             Value jsProps = context.getPolyglotContext().asValue(ProxyObject.fromMap(finalProps));
+            Value jsWebContext = context.getPolyglotContext().asValue(webContext);
+            
             context.getRenderer().execute(
                     context.getComponents(),
                     configuration.getModuleName(),
                     componentName,
                     jsProps,
+                    jsWebContext,
                     callback
             );
 
-            RenderContext renderContext = new RenderContext(componentName, finalProps);
+            RenderContext renderContext = new RenderContext(componentName, finalProps, webContext);
 
             String ssrHTML = callback.getHtml();
 

@@ -72,10 +72,18 @@ public class ClientCode {
             e.printStackTrace();
             propsJson = "{}";
         }
+        String contextJson;
+        try {
+            contextJson = objectMapper.writeValueAsString(renderContext.getWebContext());
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            contextJson = "{}";
+        }
         return "<script type=\"text/javascript\">"
                 + "window.doubleView = window.doubleView || {};"
                 + "window.doubleView.props = " + propsJson + ";"
                 + "window.doubleView.component = '" + renderContext.getComponentName() + "';"
+                + "window.doubleView.context = " + contextJson + ";"
                 + "</script>";
     }
 }

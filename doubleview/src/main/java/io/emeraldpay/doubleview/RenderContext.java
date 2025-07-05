@@ -18,9 +18,12 @@ public class RenderContext {
      */
     private final Map<String, Object> props;
 
-    public RenderContext(String componentName, Map<String, Object> props) {
+    private final WebContext webContext;
+
+    public RenderContext(String componentName, Map<String, Object> props, WebContext webContext) {
         this.componentName = componentName;
         this.props = props;
+        this.webContext = webContext;
     }
 
     public String getComponentName() {
@@ -29,6 +32,10 @@ public class RenderContext {
 
     public Map<String, Object> getProps() {
         return props;
+    }
+
+    public WebContext getWebContext() {
+        return webContext;
     }
 
     @Override

@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "vite build"
+    "build": "npm run build:hello-world && npm run build:web-context",
+    "build:hello-world": "vite build --config vite.hello-world.ts",
+    "build:web-context": "vite build --config vite.web-context.ts"
   },
   "dependencies": {
     "react": "^18.3.1",

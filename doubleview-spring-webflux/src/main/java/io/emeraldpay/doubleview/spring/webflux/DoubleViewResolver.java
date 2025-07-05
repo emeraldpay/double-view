@@ -13,6 +13,7 @@ import java.util.Locale;
 public class DoubleViewResolver implements ViewResolver {
 
     private final DoubleViewRenderer renderer;
+    private final DoubleViewRendererConfiguration configuration;
 
     /**
      * Scheduler to use for rendering. It's a CPU bound task, and also it's a resource-heavy task
@@ -21,16 +22,20 @@ public class DoubleViewResolver implements ViewResolver {
     private Scheduler scheduler = Schedulers.parallel();
 
     public DoubleViewResolver(DoubleViewRendererConfiguration configuration) {
-        renderer = new DoubleViewRenderer(configuration);
+        this(configuration, new DoubleViewRenderer(configuration));
     }
 
-    public DoubleViewResolver(DoubleViewRenderer renderer) {
+    public DoubleViewResolver(DoubleViewRendererConfiguration configuration, DoubleViewRenderer renderer) {
+        if (configuration == null) {
+            throw new IllegalArgumentException("DoubleViewRendererConfiguration cannot be null");
+        }
+        this.configuration = configuration;
         this.renderer = renderer;
     }
 
     @Override
     public Mono<View> resolveViewName(String viewName, Locale locale) {
-        return Mono.just(new DoubleView(renderer, scheduler, viewName));
+        return Mono.just(new DoubleView(renderer, scheduler, viewName, configuration.getRequestAttributes()));
     }
 
     public Scheduler getScheduler() {

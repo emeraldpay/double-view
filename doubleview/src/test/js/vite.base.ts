@@ -2,8 +2,8 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
-// https://vitejs.dev/config/
-export default defineConfig({
+// Base configuration shared by all test builds
+export const baseConfig = defineConfig({
   plugins: [
       react(),
       nodePolyfills({
@@ -15,18 +15,10 @@ export default defineConfig({
     target: 'webworker'
   },
   build: {
-    lib: {
-      entry: './src/HelloWorld.tsx',
-      name: 'doubleview-test-hello-world',
-    },
     outDir: './build',
     sourcemap: false,
     ssr: true,
-    rollupOptions: {
-      output: {
-        entryFileNames: 'hello-world.js',
-      }
-    },
+    emptyOutDir: false,
     commonjsOptions: {
       include: [/node_modules/],
     },

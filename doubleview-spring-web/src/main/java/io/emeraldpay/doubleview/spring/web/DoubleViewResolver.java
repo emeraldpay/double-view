@@ -10,18 +10,19 @@ import java.util.Locale;
 public class DoubleViewResolver implements ViewResolver {
 
     private final DoubleViewRenderer renderer;
+    private final DoubleViewRendererConfiguration configuration;
 
     public DoubleViewResolver(DoubleViewRendererConfiguration configuration) {
-        renderer = new DoubleViewRenderer(configuration);
-    }
-
-    public DoubleViewResolver(DoubleViewRenderer renderer) {
-        this.renderer = renderer;
+        if (configuration == null) {
+            throw new IllegalArgumentException("DoubleViewRendererConfiguration cannot be null");
+        }
+        this.configuration = configuration;
+        this.renderer = new DoubleViewRenderer(configuration);
     }
 
     @Override
     public View resolveViewName(String viewName, Locale locale) {
-        return new DoubleView(renderer, viewName);
+        return new DoubleView(renderer, viewName, configuration.getRequestAttributes());
     }
 
 }
