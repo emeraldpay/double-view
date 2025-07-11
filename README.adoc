@@ -103,48 +103,30 @@ config.setRequestAttributes(
 );
 ----
 
-To access them in React use the following code:
-[source, typescript]
+To access them in React, first install the DoubleView React library:
+
+[source, bash]
 ----
-import React from 'react';
+npm install @emeraldpay/doubleview-react
+# or
+pnpm add @emeraldpay/doubleview-react
+----
 
-const moduleName = "my-app-module"; // should match the name set in the DoubleViewRendererConfiguration
+Then use the provided hooks:
+[source, tsx]
+----
+import { useAttribute } from '@emeraldpay/doubleview-react';
 
-type WebContextType = {
-  attributes: Record<string, any>;
-}
+function MyComponent() {
+  const userId = useAttribute<string>('userId');
+  const locale = useAttribute<string>('locale');
 
-type DoubleView = {
-  component: string,
-  props: any,
-  context: WebContextType
-}
-
-function getDoubleView(): DoubleView {
-  // @ts-ignore
-  let instance = (globalThis as any).doubleView as DoubleView;
-  if (!instance) {
-    console.error("No DoubleView instance found in global scope");
-  }
-  return instance;
-}
-
-function useWebContext(): WebContextType | null {
-  let module = (globalThis as any)[moduleName];
-
-  if (!module) {
-    // @ts-ignore
-    globalThis[moduleName] = {}; // Initialize it if not found
-    module = (globalThis as any)[moduleName];
-  }
-
-  let WebContext = module.WebContext;
-  if (!WebContext) {
-    WebContext = React.createContext(getDoubleView().context)
-    module.WebContext = WebContext; // Store it back to global scope
-  }
-
-  return React.useContext(WebContext);
+  return (
+    <div>
+      <p>User ID: {userId}</p>
+      <p>Locale: {locale}</p>
+    </div>
+  );
 }
 ----
 

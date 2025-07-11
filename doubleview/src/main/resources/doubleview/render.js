@@ -3,12 +3,16 @@ export async function ssr(context, moduleName, componentName, props, webContext,
     let ReactDOMServer = globalThis[moduleName].ReactDOMServer;
     let React = globalThis[moduleName].React;
 
-    // Get or create WebContext - reuse the same instance from the module if it exists
-    let WebContext = globalThis[moduleName].WebContext;
+    // Get or create WebContext - use globalThis.doubleView.WebContext for shared access
+    if (!globalThis.doubleView) {
+        globalThis.doubleView = {};
+    }
+    
+    let WebContext = globalThis.doubleView.WebContext;
     if (!WebContext) {
         WebContext = React.createContext(null);
         // remember the context in the global scope, so it can be reused
-        globalThis[moduleName].WebContext = WebContext;
+        globalThis.doubleView.WebContext = WebContext;
     }
     
     // Create a provider component that wraps the app with webContext
