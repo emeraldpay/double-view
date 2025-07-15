@@ -26,6 +26,11 @@ jobs:
                 with:
                     java-version: 21
 
+            -   name: Set up PNPM
+                uses: pnpm/action-setup@v4
+                with:
+                    version: 10
+
             -   name: Check
                 uses: eskatos/gradle-command-action@v1
                 with:
