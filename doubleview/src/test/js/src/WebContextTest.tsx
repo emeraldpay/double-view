@@ -1,24 +1,23 @@
 import "fast-text-encoding"; // org.graalvm.polyglot.PolyglotException: ReferenceError: TextEncoder is not defined
-import React, { useContext } from "react";
+import React from "react";
 import ReactDOMServer from 'react-dom/server';
 
 type WebContextTestProps = {
     title?: string;
 }
 
-// Hook to access WebContext from global scope
-function useWebContext() {
-    const moduleName = 'doubleview-test-web-context';
-    const WebContext = (globalThis as any)[moduleName]?.WebContext;
-    
-    if (!WebContext) {
-        return null;
-    }
-    
-    const webContext = useContext(WebContext);
-    
-    // Test direct access to public field
-    return webContext;
+export interface WebContextType {
+  attributes: Record<string, any>
+}
+
+export function useWebContext(): WebContextType | null {
+  // See the default render.js which puts it here
+  const WebContext = (globalThis as any).doubleView.WebContext;
+  if (!WebContext) {
+    return null;
+  }
+
+  return React.useContext(WebContext)
 }
 
 export const WebContextTest: React.FC<WebContextTestProps> = (props) => {
