@@ -37,7 +37,8 @@ jobs:
                     file: ./build/libs/*.jar
                     file_glob: true
 
-    publish-gcp-artifacts:
+    publish-maven:
+        name: Publish to Maven
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@master
@@ -65,3 +66,27 @@ jobs:
                 uses: eskatos/gradle-command-action@v1
                 with:
                     arguments: publish
+
+    publish-npm:
+        name: Publish to NPM
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout the code
+              uses: actions/checkout@v3
+              with:
+                  ref: ${{ github.ref }}
+
+            - name: Configure NPM
+              run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
+            - name: Install JS dependencies
+              working-directory: ./doubleview-react
+              run: pnpm install
+
+            - name: Build
+              working-directory: ./doubleview-react
+              run: pnpm run build
+
+            - name: Publish to NPM
+              working-directory: ./doubleview-react
+              run: pnpm publish --access=public
