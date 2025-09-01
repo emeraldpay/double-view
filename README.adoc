@@ -1,5 +1,5 @@
 = Double View - React SSR Views for Java
-:lib-version: 0.3.0
+:lib-version: 0.4.0
 
 image:https://github.com/emeraldpay/double-view/workflows/Tests/badge.svg["Unit Tests"]
 image:https://img.shields.io/github/license/emeraldpay/double-view.svg?maxAge=2592000["License",link="https://github.com/emeraldpay/double-view/blob/master/LICENSE"]
