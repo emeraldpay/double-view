@@ -134,6 +134,10 @@ function MyComponent() {
 
 See the demo project: link:demo/[Double View Demo]
 
+== Documentation
+
+See the full documentation: link:docs/[Double View Documentation]
+
 == Acknowledgements
 
 The initial code was based on the code for the Micronaut Views implementation of the React SSR (https://github.com/micronaut-projects/micronaut-views/tree/5.5.x/views-react/src/main/java/io/micronaut/views/react[see the original code here]).

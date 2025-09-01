@@ -1,0 +1,180 @@
+= Spring Integration
+:toc:
+:toclevels: 2
+
+toc::[]
+
+Double View provides seamless integration with both Spring Web MVC and Spring WebFlux frameworks.
+
+== Spring Web MVC Integration
+
+=== Dependencies
+Add the Spring Web MVC integration dependency to your `build.gradle`:
+
+[source,groovy]
+----
+dependencies {
+    implementation "io.emeraldpay.doubleview:doubleview:0.3.0"
+    implementation "io.emeraldpay.doubleview:doubleview-spring-web:0.3.0"
+}
+----
+
+=== Configuration
+
+Create a configuration class that implements `WebMvcConfigurer`:
+
+[source,java]
+----
+@Configuration
+@EnableWebMvc
+public class DoubleViewConfig implements WebMvcConfigurer {
+
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        DoubleViewRendererConfiguration config = new DoubleViewRendererConfiguration();
+        config.setModuleName("my-app");
+        config.setObjectMapper(new ObjectMapper());
+        config.setClientBundleURL("/assets/client.js");
+        config.setServerBundlePath("classpath:/server.js");
+
+        DoubleViewRenderer renderer = new DoubleViewRenderer(config);
+        renderer.setHeadGenerator(new HTMLHeadValues.Builder()
+                .title("My Application")
+                .stylesheet("/styles.css")
+                .build()
+        );
+
+        registry.viewResolver(new DoubleViewResolver(renderer));
+    }
+}
+----
+
+=== Controller Usage
+
+Use `ModelAndView` to return views that will be rendered using React components:
+
+[source,java]
+----
+@Controller
+public class MyController {
+
+    @GetMapping("/")
+    public ModelAndView home() {
+        return new ModelAndView("HomePage", "message", "Welcome to Double View!");
+    }
+
+    @GetMapping("/users/{id}")
+    public ModelAndView userProfile(@PathVariable Long id) {
+        User user = userService.findById(id);
+        return new ModelAndView("UserProfile", "user", user);
+    }
+}
+----
+
+=== Request Attributes
+
+To pass request attributes to React components, configure them in your setup:
+
+[source,java]
+----
+@Override
+public void configureViewResolvers(ViewResolverRegistry registry) {
+    DoubleViewRendererConfiguration config = new DoubleViewRendererConfiguration();
+    // ... other config
+    
+    // Configure request attributes to be passed to React
+    config.setRequestAttributes(List.of("userId", "locale", "theme"));
+    
+    DoubleViewRenderer renderer = new DoubleViewRenderer(config);
+    registry.viewResolver(new DoubleViewResolver(renderer));
+}
+----
+
+== Spring WebFlux Integration
+
+=== Dependencies
+
+Add the Spring WebFlux integration dependency to your `build.gradle`:
+
+[source,groovy]
+----
+dependencies {
+    implementation "io.emeraldpay.doubleview:doubleview:0.3.0"
+    implementation "io.emeraldpay.doubleview:doubleview-spring-webflux:0.3.0"
+}
+----
+
+=== Configuration
+
+Create a configuration class for WebFlux:
+
+[source,java]
+----
+@Configuration
+@EnableWebFlux
+public class DoubleViewConfig implements WebFluxConfigurer {
+
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        DoubleViewRendererConfiguration config = new DoubleViewRendererConfiguration();
+        config.setModuleName("my-app");
+        config.setObjectMapper(new ObjectMapper());
+        config.setClientBundleURL("/assets/client.js");
+        config.setServerBundlePath("classpath:/server.js");
+
+        DoubleViewRenderer renderer = new DoubleViewRenderer(config);
+        renderer.setHeadGenerator(new HTMLHeadValues.Builder()
+                .title("My Reactive Application")
+                .stylesheet("/styles.css")
+                .build()
+        );
+
+        DoubleViewResolver resolver = new DoubleViewResolver(config, renderer);
+        
+        registry.viewResolver(resolver);
+    }
+}
+----
+
+=== Controller Usage
+
+Use reactive controllers with `ModelAndView`:
+
+[source,java]
+----
+@Controller
+public class MyReactiveController {
+
+    @GetMapping("/")
+    public Mono<ModelAndView> home() {
+        return Mono.just(new ModelAndView("HomePage", "message", "Welcome to Double View!"));
+    }
+
+    @GetMapping("/users/{id}")
+    public Mono<ModelAndView> userProfile(@PathVariable Long id) {
+        return userService.findById(id)
+            .map(user -> new ModelAndView("UserProfile", "user", user));
+    }
+}
+----
+
+=== Scheduler Configuration
+
+WARNING: For better performance, it's important to use a CPU-bound scheduler for rendering.
+
+WebFlux integration allows you to configure a custom scheduler for rendering:
+
+[source,java]
+----
+@Configuration
+public class DoubleViewConfig {
+
+    @Bean
+    public DoubleViewResolver doubleViewResolver() {
+        DoubleViewResolver resolver = new DoubleViewResolver(config, renderer);
+        // Configure custom scheduler for rendering
+        resolver.setScheduler(Schedulers.newParallel("render", 4));
+        return resolver;
+    }
+}
+----

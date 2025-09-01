@@ -1,0 +1,234 @@
+= Client-Side Setup
+
+== Project Structure
+
+Organize your React code to support both server-side and client-side rendering:
+
+[source]
+----
+src/
+├── main/
+│   ├── java/           # Your Spring application
+│   └── react/          # React components and entry points
+│       ├── components/ # Your React components
+│       ├── client.tsx  # Client-side entry point
+│       └── server.tsx  # Server-side entry point
+├── vite.client.ts      # Client build configuration
+├── vite.server.ts      # Server build configuration
+└── vite.shared.ts      # Shared configuration
+----
+
+== Build Configuration
+
+=== Shared Configuration
+
+Create a shared configuration file for common settings:
+
+[source,typescript]
+----
+// vite.shared.ts
+import { defineConfig } from 'vite';
+
+export const SharedConfig = defineConfig({
+  build: {
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name].[ext]',
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/chunk-[name].js',
+      }
+    },
+    commonjsOptions: {
+      include: [/node_modules/],
+    },
+  }
+});
+----
+
+=== Server-Side Configuration
+
+Configure Vite for server-side rendering:
+
+[source,typescript]
+----
+// vite.server.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import { SharedConfig } from './vite.shared';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    nodePolyfills({
+      include: ['util', 'stream', 'events', 'buffer']
+    })
+  ],
+  optimizeDeps: {
+    ...SharedConfig.optimizeDeps,
+  },
+  ssr: {
+    noExternal: true,
+    target: 'webworker'
+  },
+  build: {
+    ...SharedConfig.build,
+    lib: {
+      entry: './src/main/react/server.tsx',
+      name: 'my-app',
+    },
+    outDir: './build/server',
+    sourcemap: false,
+    ssr: true,
+  }
+});
+----
+
+=== Client-Side Configuration
+
+Configure Vite for client-side hydration:
+
+[source,typescript]
+----
+// vite.client.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { SharedConfig } from './vite.shared';
+
+export default defineConfig({
+  plugins: [
+    react(),
+  ],
+  optimizeDeps: {
+    ...SharedConfig.optimizeDeps,
+  },
+  define: {
+    'process.env': {
+      NODE_ENV: process.env.NODE_ENV || "development"
+    },
+  },
+  build: {
+    ...SharedConfig.build,
+    lib: {
+      entry: './src/main/react/client.tsx',
+      name: 'my-app',
+    },
+    outDir: './build/client',
+    ssr: false,
+    sourcemap: true,
+    minify: process.env.NODE_ENV === 'production',
+  }
+});
+----
+
+== React Component Setup
+
+=== Server Entry Point
+
+Create a server entry point that exports your React components:
+
+[source,typescript]
+----
+// src/main/react/server.tsx
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
+
+// Import all your components that will be used as views
+import { App } from './components/App';
+import { UserProfile } from './components/UserProfile';
+import { Dashboard } from './components/Dashboard';
+
+export {
+  // Your Views
+  App,
+  UserProfile,
+  Dashboard,
+
+  // Export React and ReactDOMServer for Double View
+  React,
+  ReactDOMServer
+};
+----
+
+=== Client Entry Point
+
+Create a client entry point for hydration:
+
+[source,typescript]
+----
+// src/main/react/client.tsx
+import React from 'react';
+import { hydrateRoot } from 'react-dom/client';
+
+// Import all your components
+import { App } from './components/App';
+import { UserProfile } from './components/UserProfile';
+import { Dashboard } from './components/Dashboard';
+
+// Global type declaration for Double View
+declare global {
+  interface Window {
+    doubleView: {
+      props: any;
+      componentName: string;
+    };
+  }
+}
+
+// Component registry for dynamic hydration
+const components = {
+  App,
+  UserProfile,
+  Dashboard,
+};
+
+addEventListener("load", () => {
+  const container = document.getElementById("react");
+  if (container && window.doubleView) {
+    const componentName = window.doubleView.componentName;
+    const Component = components[componentName];
+    
+    if (Component) {
+      hydrateRoot(container, <Component {...window.doubleView.props} />);
+    } else {
+      console.error(`Component ${componentName} not found`);
+    }
+  }
+});
+----
+
+== Package.json Configuration
+
+Configure your build scripts:
+
+[source,json]
+----
+{
+  "name": "my-app",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "vite build --config vite.client.ts && vite build --config vite.server.ts",
+    "build:client": "vite build --config vite.client.ts",
+    "build:server": "vite build --config vite.server.ts",
+    "build:watch": "concurrently \"vite build --config vite.client.ts --watch\" \"vite build --config vite.server.ts --watch\"",
+    "dev": "vite build --config vite.client.ts --watch & vite build --config vite.server.ts --watch"
+  },
+  "dependencies": {
+    "@emeraldpay/doubleview-react": "^0.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "fast-text-encoding": "^1.0.6",
+    "web-streams-polyfill": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.17",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^8.0.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "vite-plugin-node-polyfills": "^0.22.0"
+  }
+}
+----

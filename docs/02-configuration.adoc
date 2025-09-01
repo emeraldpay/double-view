@@ -1,0 +1,260 @@
+= Configuration Reference
+:toc:
+:toclevels: 2
+
+toc::[]
+
+This document describes all available configuration options for Double View.
+
+== DoubleViewRendererConfiguration
+
+The `DoubleViewRendererConfiguration` class contains all the main configuration options for the Double View renderer.
+
+=== Basics
+
+==== moduleName
+*Type:* `String` +
+*Default:* `"doubleview"` +
+*Required:* Yes
+
+The name of the JavaScript module as defined in your Vite/Webpack configuration. This must match the `name` property in your build configuration.
+
+[source,java]
+----
+config.setModuleName("my-app");
+----
+
+==== objectMapper
+*Type:* `ObjectMapper` +
+*Default:* `null` +
+*Required:* Yes
+
+Jackson ObjectMapper instance used to convert props to JSON for client-side processing.
+
+[source,java]
+----
+config.setObjectMapper(new ObjectMapper());
+----
+
+=== Javascript Bundle
+
+==== clientBundleURL
+*Type:* `String` +
+*Default:* `"/static/client.js"` +
+*Required:* Yes
+
+Public URL of the client bundle. This is used to load the client bundle in the browser for hydration.
+
+[source,java]
+----
+config.setClientBundleURL("/assets/client.js");
+----
+
+==== serverBundlePath
+*Type:* `String` +
+*Default:* `"classpath:/views/ssr-components.mjs"` +
+*Required:* Yes
+
+Path to the server-side JavaScript bundle. Can be a classpath resource or file system path.
+
+[source,java]
+----
+config.setServerBundlePath("classpath:/server.js");
+config.setServerBundlePath("./build/server.js");
+----
+
+==== rendererScript
+*Type:* `String` +
+*Default:* `"classpath:/doubleview/render.js"` +
+*Required:* No
+
+Path to the internal renderer script.
+It gets the model and other details, and performs the React rendering.
+
+NOTE: Usually, you don't need to change this.
+
+[source,java]
+----
+config.setRendererScript("classpath:/custom/render.js");
+----
+
+==== htmlTemplatePath
+*Type:* `String` +
+*Default:* `"classpath:/doubleview/template.html"` +
+*Required:* No
+
+Path to the HTML template file. The template must contain placeholders for the rendered content. In most cases you keep the default template, and provide the customization as parameters to it.
+
+[source,java]
+----
+config.setHtmlTemplatePath("classpath:/custom-template.html");
+----
+
+The default template structure:
+[source,html]
+----
+<!DOCTYPE html>
+<html>
+<head>
+    {{HEAD}}
+</head>
+<body>
+    <div id="react">{{CONTENT}}</div>
+    <script>
+        window.doubleView = {
+            props: {{PROPS}}
+        };
+    </script>
+    <script src="{{CLIENT_BUNDLE_URL}}"></script>
+</body>
+</html>
+----
+
+Where `{{HEAD}}`, `{{CONTENT}}`, `{{PROPS}}`, and `{{CLIENT_BUNDLE_URL}}` are placeholders used on the server side.
+
+=== Performance
+
+==== useOptimization
+*Type:* `boolean` +
+*Default:* `true` +
+*Required:* No
+
+Enable JavaScript compilation optimization. This requires GraalVM or special configuration for embeddable JS compiler.
+
+IMPORTANT: For production, it's highly recommended use GraalVM with enabled optimization for better performance.
+
+In development mode, it's okay to disable it so it can work under any JDK.
+
+[source,java]
+----
+config.enableOptimization(false); // Disable for development
+----
+
+==== devMode
+*Type:* `boolean` +
+*Default:* `false` +
+*Required:* No
+
+Enable development mode. In development mode, the renderer loads the code each time before rendering, allowing you to see changes without restarting the application.
+
+[source,java]
+----
+config.setDevMode(true);
+// or
+config.setDevMode();
+----
+
+WARNING: Never enable development mode in production as it significantly impacts performance.
+
+=== Request Attributes
+
+==== requestAttributes
+*Type:* `List<String>` +
+*Default:* `empty list` +
+*Required:* No
+
+List of request attribute names that should be passed to React components as WebContext.
+
+[source,java]
+----
+config.setRequestAttributes(List.of("userId", "locale", "theme"));
+----
+
+These attributes can be accessed in React components using the `useAttribute` hook from `@emeraldpay/doubleview-react`.
+
+== HTMLHeadValues Configuration
+
+
+For you the resulting HTML it's likely to have parts specific for your project.
+Ex. a page title, metadata, additional CSS or JS includes, etc.
+
+The `HTMLHeadValues.Builder` allows you to configure the HTML head section of your pages.
+
+=== Basic Usage
+
+[source,java]
+----
+renderer.setHeadGenerator(new HTMLHeadValues.Builder()
+    .title("My Application")
+    .stylesheet("/styles.css")
+    .build()
+);
+----
+
+=== Available Methods
+
+==== title(String)
+Set a constant title for all pages.
+
+[source,java]
+----
+.title("My Application")
+----
+
+==== title(Function<RenderContext, String>)
+Set a dynamic title based on the render context.
+
+[source,java]
+----
+.title(context -> "Page: " + context.getViewName())
+----
+
+==== stylesheet(String)
+Add a stylesheet link to the head.
+
+[source,java]
+----
+.stylesheet("/styles.css")
+.stylesheet("https://fonts.googleapis.com/css2?family=Roboto")
+----
+
+==== add(Function<RenderContext, String>)
+Add custom head content.
+
+[source,java]
+----
+.add(context -> "<meta name=\"description\" content=\"My app description\">")
+----
+
+== Complete Configuration Example
+
+[source,java]
+----
+@Configuration
+public class DoubleViewConfig {
+    
+    @Bean
+    public DoubleViewRenderer doubleViewRenderer() {
+        DoubleViewRendererConfiguration config = new DoubleViewRendererConfiguration();
+        
+        // Basic configuration
+        config.setModuleName("my-app");
+        config.setObjectMapper(new ObjectMapper());
+        config.setClientBundleURL("/assets/client.js");
+        config.setServerBundlePath("classpath:/server.js");
+        
+        // Development settings
+        config.setDevMode(isDevelopment());
+        config.enableOptimization(!isDevelopment());
+        
+        // Request attributes
+        config.setRequestAttributes(List.of("userId", "locale"));
+        
+        DoubleViewRenderer renderer = new DoubleViewRenderer(config);
+        
+        // HTML head configuration
+        renderer.setHeadGenerator(new HTMLHeadValues.Builder()
+                .title("My Application")
+                .stylesheet("/styles.css")
+                .add(context -> "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">")
+                .build()
+        );
+        
+        return renderer;
+    }
+    
+    private boolean isDevelopment() {
+        return "development".equals(System.getProperty("spring.profiles.active"));
+    }
+}
+----

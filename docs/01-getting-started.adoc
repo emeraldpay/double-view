@@ -1,0 +1,219 @@
+= Getting Started
+:lib-version: 0.4.0
+
+== Installation
+
+=== Java Dependencies
+
+Add the following dependencies
+
+[source,groovy,subs="attributes"]
+----
+repositories {
+    maven { url  "https://maven.emrld.io" }
+}
+
+dependencies {
+    implementation "io.emeraldpay.doubleview:doubleview:{lib-version}"
+    implementation "io.emeraldpay.doubleview:doubleview-spring-web:{lib-version}"
+    // Or for Spring WebFlux:
+    // implementation "io.emeraldpay.doubleview:doubleview-spring-webflux:{lib-version}"
+}
+----
+
+=== React Dependencies
+
+Install the Double View React library:
+
+[source,bash]
+----
+npm install @emeraldpay/doubleview-react
+----
+
+== Quick Start
+
+=== 1. Create a React Component
+
+Create a simple React component that will be rendered on the server:
+
+[source,typescriptjsx]
+----
+// src/main/react/HelloWorld.tsx
+import React from 'react';
+
+interface Props {
+  name: string;
+}
+
+export function HelloWorld({ name }: Props) {
+  return (
+    <div>
+      <h1>Hello, {name}!</h1>
+      <p>This is rendered on the server side.</p>
+    </div>
+  );
+}
+----
+
+=== 2. Create Server Entry Point
+
+Create a server entry point that exports your React components:
+
+[source,typescriptjsx]
+----
+// src/main/react/server.tsx
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
+import { HelloWorld } from './HelloWorld';
+
+export {
+  // your components to be used as a View
+  HelloWorld,
+
+  // exports of the React itself because the renderer needs uses them for rendering
+  React,
+  ReactDOMServer
+};
+----
+
+=== 3. Create Client Entry Point
+
+Create a client entry point for hydration:
+
+[source,typescriptjsx]
+----
+// src/main/react/client.tsx
+import React from 'react';
+import { hydrateRoot } from 'react-dom/client';
+import { HelloWorld } from './HelloWorld';
+
+declare global {
+  interface Window {
+    doubleView: {
+      component: string,
+      props: any;
+    };
+  }
+}
+
+addEventListener("load", () => {
+  const container = document.getElementById("react");
+  if (container) {
+    // window.doubleView.component is the view name that was used in the ModelAndView on the server side
+    if (window.doubleView.component === "HelloWorld") {
+      hydrateRoot(container, <HelloWorld {...window.doubleView.props} />);
+    } else {
+      console.error("Unknown component:", window.doubleView.component);
+    }
+  }
+});
+----
+
+=== 4. Configure Spring
+
+Create a Spring configuration for Double View:
+
+[source,java]
+----
+@Configuration
+@EnableWebMvc
+public class Config implements WebMvcConfigurer {
+
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        DoubleViewRendererConfiguration config = new DoubleViewRendererConfiguration();
+        // configure it to support your data types passed to the React components
+        config.setObjectMapper(new ObjectMapper());
+         // same as in `vite.ts` below
+        config.setModuleName("my-app");
+        // how it will be accessed in the browser
+        config.setClientBundleURL("/client.js");
+        // how it will be accessed on the server
+        config.setServerBundlePath("classpath://server.js");
+
+        DoubleViewRenderer renderer = new DoubleViewRenderer(config);
+        renderer.setHeadGenerator(
+                new HTMLHeadValues.Builder()
+                    .title("Double View App")
+                    .build()
+        );
+
+        registry.viewResolver(new DoubleViewResolver(renderer));
+    }
+}
+----
+
+=== 5. Create a Controller
+
+Create a Spring controller that uses your React component:
+
+[source,java]
+----
+@Controller
+public class HelloController {
+
+    @GetMapping("/")
+    public ModelAndView index() {
+        return new ModelAndView(
+                // component name
+                "HelloWorld",
+                // model
+                "name", "World");
+    }
+}
+----
+
+=== 6. Build Configuration
+
+Create a Vite configuration for building your React code:
+
+[source,typescript]
+----
+// vite.server.js
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    nodePolyfills({
+      include: ['util', 'stream', 'events', 'buffer']
+    })
+  ],
+  ssr: {
+    noExternal: true,
+    target: 'webworker'
+  },
+  build: {
+    lib: {
+      entry: './src/main/react/server.tsx',
+      // it's the name of the module as used in DoubleViewRendererConfiguration
+      name: 'my-app',
+    },
+    outDir: './build/server',
+    ssr: true,
+  }
+});
+----
+
+=== 7. Build and Run
+
+1. Build the JavaScript code:
++
+[source,bash]
+----
+npx vite build --config vite.server.js
+npx vite build --config vite.client.js
+----
+
+2. Run your Spring application:
++
+[source,bash]
+----
+./gradlew bootRun
+----
+
+3. Open your browser and navigate to `http://localhost:8080`
+
+You should see your React component rendered on the server side!

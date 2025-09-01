@@ -1,0 +1,104 @@
+= Frequently Asked Questions
+
+== General Questions
+
+=== What is Double View?
+
+Double View allows you to render React components on the Java server using GraalVM and then hydrate them on the client side.
+I.e., a SSR solution for Java backends.
+
+=== What are the system requirements?
+
+* Java 21
+* GraalVM (recommended) for production
+
+=== Can I use Double View with Spring?
+
+Yes! Double View works with Spring Boot, Spring Web MVC or Spring WebFlux.
+
+== Setup and Configuration
+
+=== Why do I need two separate Vite configurations?
+
+The server-side and client-side JavaScript bundles have different requirements:
+
+* **Server bundle**: Needs to run in JVM and configured to compile into SSR mode
+* **Client bundle**: Runs in browsers, uses standard browser APIs
+
+=== What is the `moduleName` configuration and why is it important?
+
+The `moduleName` must match the `name` property in your Vite configuration. This tells Double View how to find your JavaScript components.
+
+[source,java]
+----
+// In Java configuration
+config.setModuleName("my-app");
+----
+
+[source,javascript]
+----
+// In vite.server.ts
+build: {
+  lib: {
+    name: 'my-app',
+  }
+}
+----
+
+=== How do I handle CSS and static assets?
+
+CSS should be imported in your React components and will be bundled by Vite. Configure Spring to serve the built assets:
+
+[source,java]
+----
+@Override
+public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry
+        .addResourceHandler("/assets/**")
+        .addResourceLocations("file:./build/client/assets/");
+}
+----
+
+=== What is the purpose of Node.js polyfills?
+
+GraalVM doesn't provide Node.js modules like `util`, `stream`, `events`, etc. The polyfills ensure your React code that depends on these modules works correctly on the server side.
+
+== Development and Debugging
+
+=== How do I debug rendering issues?
+
+==== Enable Logging
+
+Use `PropsHandler.LoggingHandler()` to see what props are being passed
+
+==== Enable Dev Mode
+
+Enable `devMode` to see changes without restarts
+
+[source,java]
+----
+renderer.setPropsHandler(new PropsHandler.LoggingHandler());
+----
+
+== Runtime Issues
+
+== Performance and Optimization
+
+=== How can I improve rendering performance?
+
+1. **Enable optimization**: Set `enableOptimization(true)` in production
+2. **Use GraalVM**: GraalVM provides better JavaScript execution performance
+3. **Minimize props**: Only pass necessary data to components
+4. **Use appropriate scheduler**: Configure custom schedulers for WebFlux
+
+=== Should I use GraalVM or OpenJDK?
+
+https://www.graalvm.org/[GraalVM] is recommended for production due to better JavaScript execution performance. For development, OpenJDK works fine with optimizations disabled.
+
+For a Docker environment just use `ghcr.io/graalvm/jdk-community:23` as a base image. See https://github.com/graalvm/container
+
+== Other Questions
+
+=== Can I use Double View with other view technologies?
+
+Most likely. Take a look at the main Double View module, it has everything you need to integrate with other frameworks.
