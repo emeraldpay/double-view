@@ -94,4 +94,4 @@ jobs:
 
             - name: Publish to NPM
               working-directory: ./doubleview-react
-              run: pnpm publish --access=public
+              run: pnpm publish --access=public --no-git-checks
