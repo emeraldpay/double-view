@@ -79,6 +79,11 @@ jobs:
             - name: Configure NPM
               run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
+            - name: Set up PNPM
+              uses: pnpm/action-setup@v4
+              with:
+                version: 10
+
             - name: Install JS dependencies
               working-directory: ./doubleview-react
               run: pnpm install
