@@ -19,7 +19,7 @@ subprojects {
     apply plugin: "com.google.cloud.artifactregistry.gradle-plugin"
 
     group = 'io.emeraldpay.doubleview'
-    version = '0.4.0'
+    version = '0.5.0-SNAPSHOT'
 
     java {
         sourceCompatibility = org.gradle.api.JavaVersion.VERSION_21
