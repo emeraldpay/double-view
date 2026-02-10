@@ -1,9 +1,15 @@
 package io.emeraldpay.doubleview.ktor
 
 import io.emeraldpay.doubleview.DoubleViewRenderer
-import io.emeraldpay.doubleview.DoubleViewRendererConfiguration
+import io.emeraldpay.doubleview.WebContext
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.TextContent
 import io.ktor.server.application.*
-import io.ktor.util.*
+import io.ktor.server.application.hooks.BeforeResponseTransform
+import io.ktor.utils.io.InternalAPI
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Ktor plugin for DoubleView React SSR rendering.
@@ -16,67 +22,45 @@ import io.ktor.util.*
  * }
  * ```
  */
-class DoubleViewPlugin(internal val config: Configuration) {
+val DoubleView: ApplicationPlugin<PluginConfiguration> = createApplicationPlugin(
+    "Doubleview",
+    ::PluginConfiguration
+) {
 
-    class Configuration {
-        /**
-         * DoubleView renderer configuration. Required.
-         */
-        var configuration: DoubleViewRendererConfiguration? = null
+    val renderer = pluginConfig.renderer ?: DoubleViewRenderer(pluginConfig.configuration
+        ?: throw IllegalArgumentException("DoubleView Renderer or Configuration must be provided"))
+    val useAttributes = pluginConfig.requestAttributes.sorted()
 
-        /**
-         * Pre-configured renderer instance. If not provided, will be created from configuration.
-         */
-        var renderer: DoubleViewRenderer? = null
-
-        /**
-         * List of request attribute keys to pass to React components via WebContext.
-         * These attributes should be set using call.attributes.put() before rendering.
-         */
-        var requestAttributes: List<String> = emptyList()
-    }
-
-    companion object Plugin : BaseApplicationPlugin<Application, Configuration, DoubleViewPlugin> {
-        override val key = AttributeKey<DoubleViewPlugin>("DoubleView")
-
-        override fun install(pipeline: Application, configure: Configuration.() -> Unit): DoubleViewPlugin {
-            val config = Configuration().apply(configure)
-
-            val rendererConfig = config.configuration
-                ?: throw IllegalArgumentException("DoubleViewRendererConfiguration must be provided")
-
-            val renderer = config.renderer ?: DoubleViewRenderer(rendererConfig)
-
-            val plugin = DoubleViewPlugin(config)
-
-            // Store renderer in application attributes for easy access
-            pipeline.attributes.put(DoubleViewRendererKey, renderer)
-            pipeline.attributes.put(DoubleViewAttributesKey, config.requestAttributes.sorted())
-
-            return plugin
+    @OptIn(InternalAPI::class)
+    on(BeforeResponseTransform(DoubleViewContent::class)) { call, content ->
+        // 1. Get WebContext attributes from call
+        // ------------------------------------
+        val contextAttributes = mutableMapOf<String, Any?>()
+        // we go through the attributes instead of getting them by name because AttributeKey is typed
+        for (key in call.attributes.allKeys) {
+            if (useAttributes.binarySearch(key.name) >= 0) {
+                val value = call.attributes.getOrNull(key)
+                if (value != null) {
+                    contextAttributes[key.name] = value
+                }
+            }
         }
+        val webContext = WebContext.of(contextAttributes)
+        // ------------------------------------
+
+        // 2. Render
+        // ------------------------------------
+        // Rendered prepares a new GraalVM context for each thread on first use in that thread, and it takes time to init.
+        // It must be called from a CPU-bound dispatcher
+        val html = withContext(Dispatchers.Default) {
+            renderer.render(content.viewName, content.props, webContext)
+        }
+        // ------------------------------------
+
+        TextContent(
+            text = html,
+            contentType = ContentType.Text.Html,
+            status = HttpStatusCode.OK,
+        )
     }
 }
-
-/**
- * Attribute key for accessing the DoubleViewRenderer instance
- */
-val DoubleViewRendererKey = AttributeKey<DoubleViewRenderer>("DoubleViewRenderer")
-
-/**
- * Attribute key for accessing the list of request attributes to pass to WebContext
- */
-val DoubleViewAttributesKey = AttributeKey<List<String>>("DoubleViewAttributes")
-
-
-/**
- * Get the DoubleViewRenderer from the application
- */
-val Application.doubleViewRenderer: DoubleViewRenderer
-    get() = attributes[DoubleViewRendererKey]
-
-/**
- * Get the list of request attributes configured for DoubleView
- */
-val Application.doubleViewAttributes: List<String>
-    get() = attributes.getOrNull(DoubleViewAttributesKey) ?: emptyList()
