@@ -30,6 +30,7 @@ val DoubleView: ApplicationPlugin<PluginConfiguration> = createApplicationPlugin
     val renderer = pluginConfig.renderer ?: DoubleViewRenderer(pluginConfig.configuration
         ?: throw IllegalArgumentException("DoubleView Renderer or Configuration must be provided"))
     val useAttributes = pluginConfig.requestAttributes.sorted()
+    val dispatcher = pluginConfig.dispatcher
 
     @OptIn(InternalAPI::class)
     on(BeforeResponseTransform(DoubleViewContent::class)) { call, content ->
@@ -52,7 +53,7 @@ val DoubleView: ApplicationPlugin<PluginConfiguration> = createApplicationPlugin
         // ------------------------------------
         // Rendered prepares a new GraalVM context for each thread on first use in that thread, and it takes time to init.
         // It must be called from a CPU-bound dispatcher
-        val html = withContext(Dispatchers.Default) {
+        val html = withContext(dispatcher) {
             renderer.render(content.viewName, content.props, webContext)
         }
         // ------------------------------------

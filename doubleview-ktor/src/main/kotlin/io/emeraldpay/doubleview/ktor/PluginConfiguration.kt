@@ -3,6 +3,8 @@ package io.emeraldpay.doubleview.ktor
 
 import io.emeraldpay.doubleview.DoubleViewRenderer
 import io.emeraldpay.doubleview.DoubleViewRendererConfiguration
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 
 class PluginConfiguration {
 
@@ -34,4 +36,5 @@ class PluginConfiguration {
     var requestAttributes: List<String> = emptyList()
 
 
+    var dispatcher: CoroutineDispatcher = Dispatchers.Default
 }
