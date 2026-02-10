@@ -61,7 +61,7 @@ val DoubleView: ApplicationPlugin<PluginConfiguration> = createApplicationPlugin
         TextContent(
             text = html,
             contentType = ContentType.Text.Html,
-            status = HttpStatusCode.OK,
+            status = content.status,
         )
     }
 }
