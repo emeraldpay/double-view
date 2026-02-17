@@ -1,5 +1,5 @@
 = Double View - React SSR Views for Java
-:lib-version: 0.4.0
+:lib-version: 0.5.0
 
 image:https://github.com/emeraldpay/double-view/workflows/Tests/badge.svg["Unit Tests"]
 image:https://img.shields.io/github/license/emeraldpay/double-view.svg?maxAge=2592000["License",link="https://github.com/emeraldpay/double-view/blob/master/LICENSE"]
@@ -10,7 +10,12 @@ image:https://img.shields.io/github/license/emeraldpay/double-view.svg?maxAge=25
 - Almost any standard React components can be used on the server side
 - Server provides standard HTML rendered from the React components
 - This HTML can be attached to the same React code on the client side (the _Hydration_)
-- Compatible with Spring Web MVC and Spring WebFlux
+
+
+.Provides integration with:
+- Spring Web MVC
+- Spring WebFlux
+- Ktor
 
 Double View allows to use standard React (and possible other JS frameworks, such as Vue) seamlessly with Java backend frameworks.
 Once the React View has rendered on the server (SSR) it can be "hydrated" back to the same React code on the client side and continue dynamic interaction without any change to the original React code.
